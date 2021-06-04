@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Material App',
       debugShowCheckedModeBanner: false,
+      // Using the WeatherBloc provider in parent widget
       home: MultiBlocProvider(providers: [
         BlocProvider(
           create: (context) => WeatherBloc(),

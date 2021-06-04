@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/bloc/weather/weather_bloc.dart';
-import 'package:weather/data/api/weatherApi.dart';
 import 'package:weather/widget/appLoader.dart';
+// import 'package:location/location.dart';
+import 'package:geolocator/geolocator.dart';
 
 import 'components/weatherCard.dart';
 
@@ -14,14 +13,61 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  String initialLoc = 'london';
+  // initial location if error fetching latitude
+  // of current location
+  String tempInitialLoc = 'london';
+
   var _controller = TextEditingController();
+
+  // gets the current location using Geolocator api
+  getLocationCurrent() async {
+    late LocationPermission permission;
+    bool serviceEnabled = true;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    return await Geolocator.getCurrentPosition();
+  }
+
+  getInitWeatherBloc() async {
+    // adding to weatherbloc sink
+    final weatherBloc = BlocProvider.of<WeatherBloc>(context);
+    try {
+      Position _locationData = await getLocationCurrent();
+      weatherBloc.add(
+          GetWeatherLatLong(_locationData.latitude, _locationData.longitude));
+    } catch (err) {
+      weatherBloc.add(GetWeather(tempInitialLoc));
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    final weatherBloc = BlocProvider.of<WeatherBloc>(context);
-    weatherBloc.add(GetWeather(initialLoc));
+    getInitWeatherBloc();
   }
 
   searchWeather() async {
@@ -107,8 +153,13 @@ class _MainPageState extends State<MainPage> {
           } else if (state is WeatherLoaded) {
             return WeatherCard(state.weather);
             // return Text("loaded ${state.weather['dt']}");
+          } else if (state is WeatherError) {
+            return Text(
+              state.message.toString(),
+              style: Theme.of(context).textTheme.headline6,
+            );
           } else {
-            return Text("No data found");
+            return Text("Some error occured");
           }
         },
       ),

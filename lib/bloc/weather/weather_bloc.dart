@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -10,6 +9,15 @@ part 'weather_state.dart';
 
 class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
   WeatherBloc() : super(WeatherInitial());
+
+  getLocName(googleResult) {
+    try {
+      var cmpdName = googleResult['plus_code']['compound_code'];
+      return cmpdName.split(" ").sublist(1).join(" ");
+    } catch (err) {
+      return '';
+    }
+  }
 
   @override
   Stream<WeatherState> mapEventToState(
@@ -24,11 +32,25 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
         final dynamic weather =
             await WeatherApi().fetchWeatherLatLong(coord['lat'], coord['lon']);
         weather['basic'] = weatherTemp;
-        // print(weather);
+        dynamic loc =
+            await WeatherApi().getGeoLocation(coord['lat'], coord['lon']);
+        weather['loc_name'] = getLocName(loc);
+
         yield WeatherLoaded(weather);
       } catch (err) {
-        yield WeatherError("Coudlt fetch Weather ! device offline");
+        print("---------------------");
+        print(err);
+        print("---------------------");
+        yield WeatherError("Coudnt't fetch Weather ");
       }
+    } else if (event is GetWeatherLatLong) {
+      // if latitude and longitude is provided
+      final dynamic weather = await WeatherApi()
+          .fetchWeatherLatLong(event.latitude, event.longitude);
+      dynamic loc =
+          await WeatherApi().getGeoLocation(event.latitude, event.longitude);
+      weather['loc_name'] = getLocName(loc);
+      yield WeatherLoaded(weather);
     }
   }
 }

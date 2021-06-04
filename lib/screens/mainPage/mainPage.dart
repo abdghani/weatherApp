@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:weather/bloc/weather/weather_bloc.dart';
 import 'package:weather/widget/appLoader.dart';
-// import 'package:location/location.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'components/weatherCard.dart';
@@ -159,7 +159,7 @@ class _MainPageState extends State<MainPage> {
               style: Theme.of(context).textTheme.headline6,
             );
           } else {
-            return Text("Some error occured");
+            return AppLoader("Loading weather !!");
           }
         },
       ),
@@ -173,35 +173,30 @@ class _MainPageState extends State<MainPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
-              onTap: () {
-                // showModalBottomSheet(
-                //     shape: RoundedRectangleBorder(
-                //         borderRadius:
-                //             BorderRadius.vertical(top: Radius.circular(25.0))),
-                //     // backgroundColor: Colors.black,
-                //     context: context,
-                //     isScrollControlled: true,
-                // context: context,
-                // isScrollControlled: true,
-                // shape: RoundedRectangleBorder(
-                //   borderRadius: BorderRadius.only(
-                //       topLeft: Radius.circular(30.0),
-                //       topRight: Radius.circular(30.0)),
-                // ),
-                // builder: (ctx) {
-                //   return searchBar();
-                // });
-
-                showModalBottomSheet(
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(25.0))),
-                    // backgroundColor: Colors.black,
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) => searchBar());
-              },
-              child: Icon(Icons.search))
+            onTap: () => getInitWeatherBloc(),
+            child: FaIcon(
+              FontAwesomeIcons.compass,
+              size: 20,
+            ),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          GestureDetector(
+            onTap: () {
+              showModalBottomSheet(
+                  shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(25.0))),
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => searchBar());
+            },
+            child: FaIcon(
+              FontAwesomeIcons.searchLocation,
+              size: 20,
+            ),
+          )
         ],
       );
     }

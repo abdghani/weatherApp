@@ -38,9 +38,6 @@ class WeatherBloc extends Bloc<WeatherEvent, WeatherState> {
 
         yield WeatherLoaded(weather);
       } catch (err) {
-        print("---------------------");
-        print(err);
-        print("---------------------");
         yield WeatherError("Coudnt't fetch Weather ");
       }
     } else if (event is GetWeatherLatLong) {

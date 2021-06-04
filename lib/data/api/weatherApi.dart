@@ -11,7 +11,6 @@ class WeatherApi {
       'https://maps.googleapis.com/maps/api/geocode/json';
 
   dynamic formatResponse(response) {
-    print("=======================");
     var statusCode = response.statusCode;
 
     if (statusCode! >= 200 && statusCode < 299) {
@@ -37,14 +36,9 @@ class WeatherApi {
       String url =
           '$weatherApiBase/weather?q=$location&units=metric&appid=$WeatherApiKey';
       var response = await Dio().get(url);
-      // print(response.data);
-      // return ApiResult.success(data: response.data);
-      // return formatResponse(response);
       return response.data;
     } catch (err) {
-      print("ayayassss777");
-      // return ApiResult.failure(error: NetworkExceptions.getDioException(err));
-      return NetworkExceptions.getDioException(err);
+      throw NetworkExceptions.getDioException(err);
     }
   }
 
@@ -53,11 +47,9 @@ class WeatherApi {
       String url =
           '$weatherApiBase/onecall?lat=$lat&lon=$long&units=metric&appid=$WeatherApiKey';
       var response = await Dio().get(url);
-      // return formatResponse(response);
       return response.data;
     } catch (err) {
-      print("ayayassss");
-      return NetworkExceptions.getDioException(err);
+      throw NetworkExceptions.getDioException(err);
     }
   }
 
@@ -66,11 +58,9 @@ class WeatherApi {
       String url =
           "$googleBase?latlng=$lat,$long&sensor=true&key=$GoogleApiKey";
       var response = await Dio().get(url);
-      // return formatResponse(response);
       return response.data;
-    } on SocketException {
-      print("ayayassss==");
-      throw ConnectionException("Connection Error");
+    } catch (err) {
+      throw NetworkExceptions.getDioException(err);
     }
   }
 }

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
           create: (context) => WeatherBloc(),
         ),
       ], child: MainPage()),
-      theme: lighTheme,
+      theme: lightTheme,
     );
   }
 }
